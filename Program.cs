@@ -3,6 +3,8 @@
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.SemanticKernel.Orchestration;
+using SKIngest;
 
 var configBuilder = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -28,18 +30,46 @@ var sk = Kernel.Builder.
     WithMemoryStorage(new VolatileMemoryStore()).
     Build();
 
-//build pipeline
-var dataIngestionPipeline = new DataImporter(sk);
+var prompt = "Evaluate the given input against the material referenced. If you don't know the answer, explain why. If you do know the answer, please cite the relevant context that gave you the answer. The input is: {{$INPUT}}. The context is: {{$CONTEXT}}";
 
-//add data source
-var folder = "";
-var csvDataSource = new CsvDataSource(folder);
-dataIngestionPipeline.AddDataSource(csvDataSource);
+//build pipeline
+var dataImporter = new DataImporter(sk);
+
+//add data sources
+
+//CSV data source supports 1-n data files in the given folder
+// var folder = "";
+// var csvDataSource = new CsvDataSource(folder);
+// dataImporter.AddDataSource(csvDataSource);
+
+//HTML data source supports 1-n URIs
+var uris = new[] 
+{ 
+    "https://www.ecfr.gov/current/title-26/chapter-I/subchapter-A/part-1/subject-group-ECFR504ddca54174c57/section-1.1-1" 
+};
+
+foreach (var uri in uris)
+{
+    dataImporter.AddDataSource(new HtmlDataSource(uri));
+}
 
 //add transforms
 var chunkingTransform = new ChunkingTransform();
-dataIngestionPipeline.AddTransform(chunkingTransform);
+dataImporter.AddTransform(chunkingTransform);
 
 //run pipeline
 var destinationMemoryCollection = "mycollection";
-await dataIngestionPipeline.ProcessAsync(destinationMemoryCollection);
+await dataImporter.ProcessAsync(destinationMemoryCollection);
+
+var query = "Which tax year does this document apply to?";
+var memoryQueryResults = sk.Memory.SearchAsync(destinationMemoryCollection, query, 5, 0.7);
+var memoryQueryResult = await memoryQueryResults.FirstOrDefaultAsync();
+
+var cv = new ContextVariables(prompt);
+
+if (memoryQueryResult != null)
+{
+    cv.Set("Context", memoryQueryResult.Text);
+}
+
+//var result = sk.RunAsync(cv);

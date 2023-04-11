@@ -1,4 +1,5 @@
 using Microsoft.SemanticKernel.SemanticFunctions.Partitioning;
+
 /// <summary>
 /// Takes an input resource and chunks it down to fit the given max length
 /// </summary>

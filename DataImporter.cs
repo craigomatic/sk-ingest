@@ -1,5 +1,7 @@
 using Microsoft.SemanticKernel;
 
+namespace SKIngest;
+
 public class DataImporter
 {
     private List<ITransform> _Transforms = new();
@@ -31,8 +33,11 @@ public class DataImporter
         }
 
         foreach (var ds in _Datasources)
-        {            
+        {    
+            //data sources may load into one or more resource instances
             var resources = await ds.Load();
+
+            //only supporting text resources for now
             var inputResources = resources.OfType<TextResource>();            
             var processedResources = new List<TextResource>();
 
@@ -42,21 +47,22 @@ public class DataImporter
             }
             else
             {
-                foreach (var resource in inputResources)
-                {
-                    var state = await _RunTransforms(resource);
-                    var pending = state.Pending;
-                    
-                    processedResources.AddRange(state.Completed.Cast<TextResource>());
+                var resourceQueue = new Queue<Resource>(inputResources);
 
-                    while (pending.Count > 0)
+                while (resourceQueue.Count > 0)
+                {
+                    var resource = resourceQueue.Dequeue();
+                    var state = await _RunTransforms(resource);
+
+                    if (state.Completed.Any())
                     {
-                        var result = await _RunTransforms(pending.Dequeue());
-                        
-                        foreach (var item in result.Pending)
-                        {
-                            pending.Enqueue(item);
-                        }
+                        processedResources.AddRange(state.Completed.Cast<TextResource>());
+                    }
+                    
+                    //anything pending was newly created, needs to go into the queue
+                    foreach (var item in state.Pending)
+                    {
+                        resourceQueue.Enqueue(item);
                     }
                 }
             }
@@ -76,23 +82,18 @@ public class DataImporter
         foreach (var tf in _Transforms)
         {
             //each transform operation could result in multiple outputs
-            //each output needs to be independently processed against all transforms before they are considered processed
+            //each output needs to be independently processed against all *other* transforms before they are considered processed
             var results = await tf.Run(resource);
+            
+            //the original resource is transformed in place, pass it through as completed
+            state.Completed.Add(resource);
 
-            foreach (var result in results)
+            foreach (var result in results.Skip(1))
             {
-                //don't add the input item into the reprocess queue (comparison by id)
-                if (result.Id == resource.Id)
-                {
-                    state.Completed.Add(result as TextResource);
-                }
-                else
-                {
-                    state.Pending.Enqueue(result as TextResource);    
-                }
+                state.Pending.Enqueue(result as TextResource);
             }
         }
-        
+
         return state;
     }
 
