@@ -5,6 +5,9 @@ using Microsoft.SemanticKernel.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel.Orchestration;
 using SKIngest;
+using System.Reflection;
+using Microsoft.SemanticKernel.KernelExtensions;
+using Microsoft.SemanticKernel.CoreSkills;
 
 var configBuilder = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -30,12 +33,8 @@ var sk = Kernel.Builder.
     WithMemoryStorage(new VolatileMemoryStore()).
     Build();
 
-var prompt = "Evaluate the given input against the material referenced. If you don't know the answer, explain why. If you do know the answer, please cite the relevant context that gave you the answer. The input is: {{$INPUT}}. The context is: {{$CONTEXT}}";
-
 //build pipeline
 var dataImporter = new DataImporter(sk);
-
-//add data sources
 
 //CSV data source supports 1-n data files in the given folder
 // var folder = "";
@@ -61,15 +60,18 @@ dataImporter.AddTransform(chunkingTransform);
 var destinationMemoryCollection = "mycollection";
 await dataImporter.ProcessAsync(destinationMemoryCollection);
 
-var query = "Which tax year does this document apply to?";
-var memoryQueryResults = sk.Memory.SearchAsync(destinationMemoryCollection, query, 5, 0.7);
-var memoryQueryResult = await memoryQueryResults.FirstOrDefaultAsync();
+//import skills so that the data ingested can be queried
+sk.ImportSkill(new TextMemorySkill(), nameof(TextMemorySkill));
 
-var cv = new ContextVariables(prompt);
+var query = "If I was unmarried in 1964 and made $15750, how much tax would I owe?";
 
-if (memoryQueryResult != null)
-{
-    cv.Set("Context", memoryQueryResult.Text);
-}
+sk.CreateSemanticFunction(Assembly.GetEntryAssembly().LoadEmbeddedResource("sk_ingest.skprompt.txt"),
+    "Query",
+    "IngestionSkill",
+    maxTokens: 2048);
 
-//var result = sk.RunAsync(cv);
+var contextVariables = new ContextVariables(query);
+contextVariables.Set("collection", destinationMemoryCollection);
+
+var result = sk.RunAsync(contextVariables, sk.Skills.GetSemanticFunction("IngestionSkill", "Query"));
+Console.WriteLine(result.Result);

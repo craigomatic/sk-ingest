@@ -23,7 +23,7 @@ public class ChunkingTransform : ITransform
 
         var toReturn = new List<Resource>();
 
-        if(textResource.Value.Length > this.MaxSize)
+        if (textResource.Value.Length > this.MaxSize)
         {
             List<string> lines;
             List<string> paragraphs;

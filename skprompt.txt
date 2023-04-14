@@ -1,0 +1,5 @@
+{{textmemoryskill.recall $input}}
+---
+Considering only the information above, answer the following. If you don't know the answer based on the given information, respond "I dont know".
+
+Question: {{$input}}

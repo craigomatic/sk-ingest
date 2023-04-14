@@ -16,8 +16,15 @@
     <PackageReference Include="Microsoft.SemanticKernel" Version="0.9.61.1-preview" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="skprompt.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="skprompt.txt" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="appsettings.json;appsettings.development.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup> 
+  </ItemGroup>
 </Project>

@@ -81,17 +81,7 @@ public class DataImporter
 
         foreach (var tf in _Transforms)
         {
-            //each transform operation could result in multiple outputs
-            //each output needs to be independently processed against all *other* transforms before they are considered processed
-            var results = await tf.Run(resource);
-            
-            //the original resource is transformed in place, pass it through as completed
-            state.Completed.Add(resource);
-
-            foreach (var result in results.Skip(1))
-            {
-                state.Pending.Enqueue(result as TextResource);
-            }
+            state.Completed.AddRange(await tf.Run(resource));
         }
 
         return state;
