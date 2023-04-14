@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
     <PackageReference Include="Microsoft.Playwright" Version="1.32.0" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="0.9.61.1-preview" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="0.11.146.1-preview" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="skprompt.txt" />

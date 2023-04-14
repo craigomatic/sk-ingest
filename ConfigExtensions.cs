@@ -1,5 +1,4 @@
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Configuration;
 
 public static class ConfigExtensions
 {
@@ -9,7 +8,7 @@ public static class ConfigExtensions
         {
             case Config.AzureOpenAI:
                 {
-                    kernelConfig.AddAzureOpenAITextCompletion(
+                    kernelConfig.AddAzureOpenAITextCompletionService(
                         config.AIService,
                         config.DeploymentOrModelId,
                         config.Endpoint,
@@ -18,7 +17,7 @@ public static class ConfigExtensions
                 }
             case Config.OpenAI:
                 {
-                    kernelConfig.AddOpenAITextCompletion(
+                    kernelConfig.AddOpenAITextCompletionService(
                         config.AIService,
                         config.DeploymentOrModelId,
                         config.Key);
@@ -33,7 +32,7 @@ public static class ConfigExtensions
         {
             case Config.AzureOpenAI:
                 {
-                    kernelConfig.AddAzureOpenAIEmbeddingGeneration(
+                    kernelConfig.AddAzureOpenAIEmbeddingGenerationService(
                         config.AIService,
                         config.DeploymentOrModelId,
                         config.Endpoint,
@@ -42,7 +41,7 @@ public static class ConfigExtensions
                 }
             case Config.OpenAI:
                 {
-                    kernelConfig.AddOpenAIEmbeddingGeneration(
+                    kernelConfig.AddOpenAIEmbeddingGenerationService(
                         config.AIService,
                         config.DeploymentOrModelId,
                         config.Key);
