@@ -54,6 +54,12 @@ foreach (var uri in uris)
 
 //add transforms
 var chunkingTransform = new ChunkingTransform();
+var summaryTransform = new SummaryTransform(sk);
+
+//first summarise
+dataImporter.AddTransform(summaryTransform);
+
+//then we'll chunk just incase (should not do anything as the summary should be smaller than the token limit)
 dataImporter.AddTransform(chunkingTransform);
 
 //run pipeline
@@ -65,7 +71,7 @@ sk.ImportSkill(new TextMemorySkill(), nameof(TextMemorySkill));
 
 var query = "If I was unmarried in 1964 and made $15750, how much tax would I owe?";
 
-sk.CreateSemanticFunction(Assembly.GetEntryAssembly().LoadEmbeddedResource("sk_ingest.skprompt.txt"),
+sk.CreateSemanticFunction(Assembly.GetEntryAssembly().LoadEmbeddedResource("sk_ingest.Skills.Query.skprompt.txt"),
     "Query",
     "IngestionSkill",
     maxTokens: 2048);

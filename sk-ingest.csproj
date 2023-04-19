@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="BlingFireNuget" Version="0.1.8" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
@@ -16,11 +17,13 @@
     <PackageReference Include="Microsoft.SemanticKernel" Version="0.11.146.1-preview" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="skprompt.txt" />
+    <None Remove="Skills/Query/skprompt.txt" />
+    <None Remove="Skills/Summary/skprompt.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="skprompt.txt" />
+    <EmbeddedResource Include="Skills/Query/skprompt.txt" />
+    <EmbeddedResource Include="Skills/Summary/skprompt.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="appsettings.json;appsettings.development.json">
