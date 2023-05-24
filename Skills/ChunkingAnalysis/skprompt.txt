@@ -1,0 +1,8 @@
+{{$input}}
+---
+Considering only the information above, suggest the most appropriate way to chunk the content to fit within the token window of {{$tokenWindow}}. 
+This content will then have embeddings generated using {{$embeddingModel}}. 
+
+If it would improve the ability for the model to later perform accurate cosine similarity comparisons, it's ok to overlap the content chunks.
+
+Please provide the chunking strategy in the following JSON format: [{"startChunk": 0, "endChunk": 10}]

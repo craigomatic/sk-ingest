@@ -3,7 +3,6 @@ public class Config
     public const string OpenAI = "OPENAI";
     public const string AzureOpenAI = "AZUREOPENAI";
 
-    public string Label { get; set; } = string.Empty;
     public string AIService { get; set; } = string.Empty;
     public string DeploymentOrModelId { get; set; } = string.Empty;
     public string Endpoint { get; set; } = string.Empty;
@@ -15,14 +14,12 @@ public class Config
         {
             case OpenAI:
                 return
-                    !string.IsNullOrEmpty(this.Label) &&
                     !string.IsNullOrEmpty(this.DeploymentOrModelId) &&
                     !string.IsNullOrEmpty(this.Key);
 
             case AzureOpenAI:
                 return
                     !string.IsNullOrEmpty(this.Endpoint) &&
-                    !string.IsNullOrEmpty(this.Label) &&
                     !string.IsNullOrEmpty(this.DeploymentOrModelId) &&
                     !string.IsNullOrEmpty(this.Key);
         }

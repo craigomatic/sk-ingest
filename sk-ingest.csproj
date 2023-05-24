@@ -13,17 +13,19 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="7.0.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Playwright" Version="1.32.0" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="0.11.146.1-preview" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.33.0" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="0.14.547.1-preview" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Skills/Query/skprompt.txt" />
     <None Remove="Skills/Summary/skprompt.txt" />
+    <None Remove="Skills\ChunkingAnalysis\skprompt.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Skills/Query/skprompt.txt" />
     <EmbeddedResource Include="Skills/Summary/skprompt.txt" />
+    <EmbeddedResource Include="Skills\ChunkingAnalysis\skprompt.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="appsettings.json;appsettings.development.json">

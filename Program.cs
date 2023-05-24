@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel.Orchestration;
 using SKIngest;
 using System.Reflection;
-using Microsoft.SemanticKernel.KernelExtensions;
 using Microsoft.SemanticKernel.CoreSkills;
 
 var configBuilder = new ConfigurationBuilder()
@@ -15,7 +14,7 @@ var configBuilder = new ConfigurationBuilder()
             .Build();
 
 var embeddingConfig = configBuilder.GetRequiredSection("EmbeddingConfig").Get<Config>();
-var textCompletionConfig = configBuilder.GetRequiredSection("TextCompletionConfig").Get<Config>();
+var completionConfig = configBuilder.GetRequiredSection("CompletionConfig").Get<Config>();
 
 var sk = Kernel.Builder.
     Configure(c =>
@@ -25,9 +24,9 @@ var sk = Kernel.Builder.
             c.ConfigureEmbeddings(embeddingConfig);
         }
 
-        if (textCompletionConfig != null)
+        if (completionConfig != null)
         {
-            c.ConfigureTextCompletion(textCompletionConfig);
+            c.ConfigureCompletion(completionConfig);
         }
     }).
     WithMemoryStorage(new VolatileMemoryStore()).
@@ -53,13 +52,12 @@ foreach (var uri in uris)
 }
 
 //add transforms
-var chunkingTransform = new ChunkingTransform();
-var summaryTransform = new SummaryTransform(sk);
+var chunkingAnalysis = sk.CreateSemanticFunction(Assembly.GetEntryAssembly().LoadEmbeddedResource("sk_ingest.Skills.ChunkingAnalysis.skprompt.txt"),
+    "ChunkingAnalysis",
+    "Analyse",
+    maxTokens:32768);
 
-//first summarise
-dataImporter.AddTransform(summaryTransform);
-
-//then we'll chunk just incase (should not do anything as the summary should be smaller than the token limit)
+var chunkingTransform = new ChunkingTransform(2048, chunkingAnalysis);
 dataImporter.AddTransform(chunkingTransform);
 
 //run pipeline
@@ -79,5 +77,5 @@ sk.CreateSemanticFunction(Assembly.GetEntryAssembly().LoadEmbeddedResource("sk_i
 var contextVariables = new ContextVariables(query);
 contextVariables.Set("collection", destinationMemoryCollection);
 
-var result = sk.RunAsync(contextVariables, sk.Skills.GetSemanticFunction("IngestionSkill", "Query"));
+var result = sk.RunAsync(contextVariables, sk.Skills.GetFunction("IngestionSkill", "Query"));
 Console.WriteLine(result.Result);
