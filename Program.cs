@@ -1,12 +1,10 @@
 ﻿
 //load sk
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SemanticKernel.Orchestration;
 using SKIngest;
 using System.Reflection;
-using Microsoft.SemanticKernel.KernelExtensions;
 using Microsoft.SemanticKernel.CoreSkills;
 
 var configBuilder = new ConfigurationBuilder()
@@ -15,23 +13,9 @@ var configBuilder = new ConfigurationBuilder()
             .Build();
 
 var embeddingConfig = configBuilder.GetRequiredSection("EmbeddingConfig").Get<Config>();
-var textCompletionConfig = configBuilder.GetRequiredSection("TextCompletionConfig").Get<Config>();
+var completionConfig = configBuilder.GetRequiredSection("CompletionConfig").Get<Config>();
 
-var sk = Kernel.Builder.
-    Configure(c =>
-    {
-        if (embeddingConfig != null)
-        {
-            c.ConfigureEmbeddings(embeddingConfig);
-        }
-
-        if (textCompletionConfig != null)
-        {
-            c.ConfigureTextCompletion(textCompletionConfig);
-        }
-    }).
-    WithMemoryStorage(new VolatileMemoryStore()).
-    Build();
+var sk = Kernel.Builder.Configure(embeddingConfig, completionConfig);
 
 //build pipeline
 var dataImporter = new DataImporter(sk);
@@ -79,5 +63,12 @@ sk.CreateSemanticFunction(Assembly.GetEntryAssembly().LoadEmbeddedResource("sk_i
 var contextVariables = new ContextVariables(query);
 contextVariables.Set("collection", destinationMemoryCollection);
 
-var result = sk.RunAsync(contextVariables, sk.Skills.GetSemanticFunction("IngestionSkill", "Query"));
+var result = await sk.RunAsync(contextVariables, sk.Skills.GetFunction("IngestionSkill", "Query"));
+
+if (result.ErrorOccurred)
+{
+    Console.WriteLine($"[ERROR] {result.LastErrorDescription}");
+    return;
+}
+
 Console.WriteLine(result.Result);

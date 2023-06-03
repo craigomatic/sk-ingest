@@ -56,7 +56,7 @@ public class SummaryTransform : ITransform
 
         foreach (var item in toSummarise)
         {
-            var result = await _Kernel.RunAsync(item, _Kernel.Skills.GetSemanticFunction("Summary", "Summarise"));
+            var result = await _Kernel.RunAsync(item, _Kernel.Skills.GetFunction("Summary", "Summarise"));
             
             toReturn.Add(new TextResource
             {

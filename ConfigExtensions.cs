@@ -1,53 +1,44 @@
+﻿
+
 using Microsoft.SemanticKernel;
+using Microsoft.SemanticKernel.Memory;
 
 public static class ConfigExtensions
 {
-    public static void ConfigureTextCompletion(this KernelConfig kernelConfig, Config config)
+    public static IKernel Configure(this KernelBuilder kernelBuilder, Config? embeddingConfig, Config? completionConfig)
     {
-        switch(config.AIService)
+        if (embeddingConfig != null)
         {
-            case Config.AzureOpenAI:
-                {
-                    kernelConfig.AddAzureOpenAITextCompletionService(
-                        config.AIService,
-                        config.DeploymentOrModelId,
-                        config.Endpoint,
-                        config.Key);
+            switch (embeddingConfig.AIService.ToUpperInvariant())
+            {
+                case Config.AzureOpenAI:
+                    kernelBuilder = kernelBuilder.WithAzureTextEmbeddingGenerationService(embeddingConfig.DeploymentOrModelId, embeddingConfig.Endpoint, embeddingConfig.Key);
                     break;
-                }
-            case Config.OpenAI:
-                {
-                    kernelConfig.AddOpenAITextCompletionService(
-                        config.AIService,
-                        config.DeploymentOrModelId,
-                        config.Key);
+                case Config.OpenAI:
+                    kernelBuilder = kernelBuilder.WithOpenAITextEmbeddingGenerationService(embeddingConfig.DeploymentOrModelId, embeddingConfig.Key);
                     break;
-                }
-        }        
-    }
-
-    public static void ConfigureEmbeddings(this KernelConfig kernelConfig, Config config)
-    {
-        switch(config.AIService)
-        {
-            case Config.AzureOpenAI:
-                {
-                    kernelConfig.AddAzureOpenAIEmbeddingGenerationService(
-                        config.AIService,
-                        config.DeploymentOrModelId,
-                        config.Endpoint,
-                        config.Key);
-                    break;
-                }
-            case Config.OpenAI:
-                {
-                    kernelConfig.AddOpenAIEmbeddingGenerationService(
-                        config.AIService,
-                        config.DeploymentOrModelId,
-                        config.Key);
-                    break;
-                }
+                default:
+                    throw new NotSupportedException("Invalid AI Service was specified for embeddings");
+            }
         }
-    }
 
+        if (completionConfig != null)
+        {
+            switch (completionConfig.AIService.ToUpperInvariant())
+            {
+                case Config.AzureOpenAI:
+                    kernelBuilder = kernelBuilder.WithAzureChatCompletionService(completionConfig.DeploymentOrModelId, completionConfig.Endpoint, completionConfig.Key);
+                    break;
+                case Config.OpenAI:
+                    kernelBuilder = kernelBuilder.WithOpenAIChatCompletionService(completionConfig.DeploymentOrModelId, completionConfig.Key);
+                    break;
+                default:
+                    throw new NotSupportedException("Invalid AI Service was specified for completions");
+            }
+        }
+
+        return kernelBuilder.
+            WithMemoryStorage(new VolatileMemoryStore()).
+            Build();
+    }
 }

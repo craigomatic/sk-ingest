@@ -1,4 +1,4 @@
-using Microsoft.SemanticKernel.SemanticFunctions.Partitioning;
+using Microsoft.SemanticKernel.Text;
 
 /// <summary>
 /// Takes an input resource and chunks it down to fit the given max length
@@ -32,15 +32,15 @@ public class ChunkingTransform : ITransform
             {
                 case "text/markdown":
                 {
-                    lines = SemanticTextPartitioner.SplitMarkDownLines(textResource.Value, this.MaxSize);
-                    paragraphs = SemanticTextPartitioner.SplitMarkdownParagraphs(lines, this.MaxSize);
+                    lines = TextChunker.SplitMarkDownLines(textResource.Value, this.MaxSize);
+                    paragraphs = TextChunker.SplitMarkdownParagraphs(lines, this.MaxSize);
 
                     break;
                 }
                 default:
                 {
-                    lines = SemanticTextPartitioner.SplitPlainTextLines(textResource.Value, this.MaxSize);
-                    paragraphs = SemanticTextPartitioner.SplitPlainTextParagraphs(lines, this.MaxSize);
+                    lines = TextChunker.SplitPlainTextLines(textResource.Value, this.MaxSize);
+                    paragraphs = TextChunker.SplitPlainTextParagraphs(lines, this.MaxSize);
 
                     break;
                 }
